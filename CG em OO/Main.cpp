@@ -21,6 +21,9 @@
 #include "Vector3.h"
 #include "LightSource.h"
 #include "Sphere.h"
+#include "ImageClass.h"
+#include "SOIL/SOIL.h"
+
 
 
 using namespace std;
@@ -34,6 +37,36 @@ int window;
 GLuint* vao;
 GLuint* vbo;
 GLuint* ibo;
+
+ImageClass Image;
+
+
+void init()
+{
+    int r;
+    // Carrega a uma imagem
+    r = Image.Load("paisagem.jpg"); // Carrega uma imagem
+//    r = Image.Load("Ruido2.bmp"); // Carrega uma imagem
+
+    if (!r) exit(1); // Erro na carga da imagem
+    else cout << ("Imagem carregada!\n");
+
+    // Ajusta o tamnho da imagem da direita, para que ela
+    // passe a ter o mesmo tamnho da imagem recem carregada
+    // Caso precise alterar o tamanho da nova imagem, mude os parâmetros
+    // da na chamada abaixo
+   // NewImage.SetSize(Image.SizeX(), Image.SizeY(), Image.Channels());
+    //cout << "Nova Imagem Criada" << endl;
+
+}
+
+
+
+
+
+
+
+
 
 
 void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &ponto){
@@ -87,12 +120,34 @@ void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &p
 void Desenho(void)
 {
 	cout<<"Fazendo imagem"<<endl;
-	// Teste com uma linha
 	glClear(GL_COLOR_BUFFER_BIT);
-	glBegin(GL_POINTS);
 
+    glMatrixMode(GL_MODELVIEW);
+   
+
+// Ajusta o ZOOM da imagem para que apareca na metade da janela
+    float zoomH = windowWidth / (double)Image.SizeX();
+    float zoomV = windowHeight / (double)Image.SizeY();
+    Image.SetZoomH(zoomH);
+    Image.SetZoomV(zoomV);
+
+// posiciona a imagem nova na metada da direita da janela
+    //NewImage.SetPos(glutGet(GLUT_WINDOW_WIDTH)/2, 0);
+
+// Ajusta o ZOOM da imagem para que apareca na metade da janela
+    //NewImage.SetZoomH(zoomH);
+    //NewImage.SetZoomV(zoomV);
+
+// Coloca as imagens na tela
+    Image.SetPos(-300,-300);
+    Image.Display();
+    //NewImage.Display();
+
+	// Teste com uma linha
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glBegin(GL_POINTS);
 	//pintando o fundo
-	for(int i = 0; i < windowWidth; ++i){
+	/*for(int i = 0; i < windowWidth; ++i){
 		for(int j = 0; j < windowHeight; ++j){
 			double x = (i  - windowWidth/2);
 			double y = (j  - windowHeight/2);
@@ -100,7 +155,7 @@ void Desenho(void)
 			glColor3d(0.2,0.2,0.5);
 			glVertex2d(x,y);
 		}
-	}
+	}*/
 
 	//definindo o boneco
 	Sphere Snow_Man[9];
@@ -250,8 +305,8 @@ int main(int argc, char *argv[])
 	window = glutCreateWindow("O Melhor de Todos os Desenhos");
 
 	glewExperimental = GL_TRUE;
-	glewInit();
-
+//	glewInit();
+	init();
 
 	// Definição de callbacks
 	glutReshapeFunc(_Redimensionar);
