@@ -12,6 +12,9 @@
 #include <sstream>
 #include <fstream>
 
+//include da imagem
+#include "CImg.h"
+
 //includes do GL
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -21,53 +24,22 @@
 #include "Vector3.h"
 #include "LightSource.h"
 #include "Sphere.h"
-#include "ImageClass.h"
-#include "SOIL/SOIL.h"
+//#include "ImageClass.h"
+//#include "SOIL.h"
 
 
 
 using namespace std;
 
-//dimensoes da tela
-GLdouble windowWidth  = 600.0;
-GLdouble windowHeight = 600.0;
+//dimensoes da tela, adaptar com a quantidade de pixels da imagem usada
+GLdouble windowWidth  = 410.0;
+GLdouble windowHeight = 410.0;
 
 int window;
 
 GLuint* vao;
 GLuint* vbo;
 GLuint* ibo;
-
-ImageClass Image;
-
-
-void init()
-{
-    int r;
-    // Carrega a uma imagem
-    r = Image.Load("paisagem.jpg"); // Carrega uma imagem
-//    r = Image.Load("Ruido2.bmp"); // Carrega uma imagem
-
-    if (!r) exit(1); // Erro na carga da imagem
-    else cout << ("Imagem carregada!\n");
-
-    // Ajusta o tamnho da imagem da direita, para que ela
-    // passe a ter o mesmo tamnho da imagem recem carregada
-    // Caso precise alterar o tamanho da nova imagem, mude os parâmetros
-    // da na chamada abaixo
-   // NewImage.SetSize(Image.SizeX(), Image.SizeY(), Image.Channels());
-    //cout << "Nova Imagem Criada" << endl;
-
-}
-
-
-
-
-
-
-
-
-
 
 void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &ponto){
 	Vector3 Kc;
@@ -120,42 +92,31 @@ void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &p
 void Desenho(void)
 {
 	cout<<"Fazendo imagem"<<endl;
+
+	using namespace cimg_library;
+
+	//limpando a tela
 	glClear(GL_COLOR_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-   
-
-// Ajusta o ZOOM da imagem para que apareca na metade da janela
-    float zoomH = windowWidth / (double)Image.SizeX();
-    float zoomV = windowHeight / (double)Image.SizeY();
-    Image.SetZoomH(zoomH);
-    Image.SetZoomV(zoomV);
-
-// posiciona a imagem nova na metada da direita da janela
-    //NewImage.SetPos(glutGet(GLUT_WINDOW_WIDTH)/2, 0);
-
-// Ajusta o ZOOM da imagem para que apareca na metade da janela
-    //NewImage.SetZoomH(zoomH);
-    //NewImage.SetZoomV(zoomV);
-
-// Coloca as imagens na tela
-    Image.SetPos(-300,-300);
-    Image.Display();
-    //NewImage.Display();
-
-	// Teste com uma linha
-	//glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_POINTS);
-	//pintando o fundo
-	/*for(int i = 0; i < windowWidth; ++i){
-		for(int j = 0; j < windowHeight; ++j){
-			double x = (i  - windowWidth/2);
-			double y = (j  - windowHeight/2);
+	
 
-			glColor3d(0.2,0.2,0.5);
-			glVertex2d(x,y);
+	//pintando o fundo
+	CImg<unsigned char> fundo("Vingadores.png");
+
+	for(int i = 0; i < windowWidth; ++i){
+		for(int j = 0; j < windowHeight; ++j){
+			
+			//x e y
+			double x = (i  - windowWidth/2);
+			double y = (j - windowHeight/2);
+			Vector3 Ipix;
+			Ipix[0] = (double)fundo(i, windowHeight-j, 0, 0)/255;
+			Ipix[1] = (double)fundo(i, windowHeight-j, 0, 1)/255;
+			Ipix[2] = (double)fundo(i, windowHeight-j, 0, 2)/255;
+			glColor3f(Ipix[0], Ipix[1], Ipix[2]);
+			glVertex2f(x, y);
 		}
-	}*/
+	}
 
 	//definindo o boneco
 	Sphere Snow_Man[9];
@@ -174,7 +135,7 @@ void Desenho(void)
 		Sphere b2=Sphere({0.0f,-30.0f,150.0f}, 8.0f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
 		Sphere b3=Sphere({0.0f,-60.0f,140.0f}, 6.5f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
 		Sphere b4=Sphere({0.0f,-90.0f,137.0f}, 6.0f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
-	
+		
 		Snow_Man[0]=cabeca;
 		Snow_Man[1]=barriga;
 		Snow_Man[2]=olho_direito;
@@ -185,12 +146,14 @@ void Desenho(void)
 		Snow_Man[7]=b3;
 		Snow_Man[8]=b4;
 
+	//Sphere chao({0.0f,-1050.0f,300.0f},800.0f,Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+
 	//luzes	
 	Light_Source sun=Light_Source({0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f});
-    Light_Source post=Light_Source({100.0f,100.0f,100.0f},{0.9f,0.9f,0.9f});
+    Light_Source post=Light_Source({100.0f,100.0f,-500.0f},{0.9f,0.9f,0.9f});
 
 	//onde esta a camera , para onde olha e a orientaçao
-	Vector3 camera={0.0f,0.0f,-100};
+	Vector3 camera={0.0f,0.0f,-250};
 	Vector3 LoockAt={0.0f,-96.0f,300.0f};
 	Vector3 ViewUp= {0.0f,150.0f,300.0f};
 	
@@ -230,6 +193,13 @@ void Desenho(void)
 					pos=pos+1;
 				}
 			}
+			/*
+			if(chao.RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
+				distancias[pos]=t;
+					cores[pos]=aux;
+					pos=pos+1;
+			}
+			*/
 			
 			//laco para descobrir o menor t
 			if(pos != 0){
@@ -247,10 +217,8 @@ void Desenho(void)
 		}
 	}
 	cout<<"Fim"<<endl;
+
 	glEnd();
-
-	
-
 	glFlush();
 	
 }
@@ -302,11 +270,9 @@ int main(int argc, char *argv[])
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize((int) windowWidth, (int) windowHeight);
 	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)- windowWidth)/2, (glutGet(GLUT_SCREEN_HEIGHT)- windowHeight)/2);
-	window = glutCreateWindow("O Melhor de Todos os Desenhos");
+	window = glutCreateWindow("A Guerra Acabou");
 
 	glewExperimental = GL_TRUE;
-//	glewInit();
-	init();
 
 	// Definição de callbacks
 	glutReshapeFunc(_Redimensionar);
