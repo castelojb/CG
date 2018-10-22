@@ -36,6 +36,7 @@ GLdouble windowWidth  = 410.0;
 GLdouble windowHeight = 410.0;
 
 int window;
+Vector3 camera={0.0f,0.0f,850.0f};
 
 GLuint* vao;
 GLuint* vbo;
@@ -146,21 +147,25 @@ void Desenho(void)
 		Snow_Man[7]=b3;
 		Snow_Man[8]=b4;
 
-	//Sphere chao({0.0f,-1050.0f,300.0f},800.0f,Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+	//Sphere chao({0.0f,-90.0f,1260.0f},800.0f,Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
 
 	//luzes	
 	Light_Source sun=Light_Source({0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f});
-    Light_Source post=Light_Source({100.0f,100.0f,-500.0f},{0.9f,0.9f,0.9f});
+    Light_Source post=Light_Source({0.0f,64.0f,100.0f},{0.9f,0.9f,0.9f});
 
 	//onde esta a camera , para onde olha e a orientaçao
-	Vector3 camera={0.0f,0.0f,-250};
+	//Vector3 camera={0.0f,0.0f,-250.0f};
 	Vector3 LoockAt={0.0f,-96.0f,300.0f};
 	Vector3 ViewUp= {0.0f,150.0f,300.0f};
+	//cout<<(camera- Snow_Man[0].centro).Magnitude()<<endl;
 	
 	for(int k=0;k<9;k++){
 		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man[k].centro);
 			
 	}
+
+	//Mundo_Camera(camera,LoockAt,ViewUp,chao.centro);
+	Mundo_Camera(camera,LoockAt,ViewUp,post.position);
 
 	Vector3 observer={0,0,0};
 	for(int i = 0; i < windowWidth; ++i)
@@ -200,6 +205,7 @@ void Desenho(void)
 					pos=pos+1;
 			}
 			*/
+			
 			
 			//laco para descobrir o menor t
 			if(pos != 0){
@@ -250,6 +256,26 @@ void _Teclado(unsigned char key, int x, int y)
 		case 27:
 			glutDestroyWindow(window);
 			exit(0);
+			break;
+
+		case 'w':
+			camera={0,0,-250};
+			break;
+		case 's':
+			camera={0.0f,0.0f,850.0f};
+			break;
+
+		case 'a':
+			camera={454,0,0};
+			break;
+		case 'd':
+			camera={-454,0,0};
+			break;
+		case 'q':
+			camera={0,454,0};
+			break;
+		case 'e':
+			camera={0,-454,0};
 			break;
 	}
 
