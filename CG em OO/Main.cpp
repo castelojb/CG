@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <fstream>
+#include <string>
 
 //include da imagem
 #include "CImg.h"
@@ -31,12 +32,16 @@
 
 using namespace std;
 
+string nome="direita.jpeg";;
+
+
 //dimensoes da tela, adaptar com a quantidade de pixels da imagem usada
-GLdouble windowWidth  = 410.0;
-GLdouble windowHeight = 410.0;
+GLdouble windowWidth  = 500.0;
+GLdouble windowHeight = 500.0;
 
 int window;
-Vector3 camera={0.0f,0.0f,850.0f};
+Vector3 camera={0,0,-250};;
+//CImg fundo;
 
 GLuint* vao;
 GLuint* vbo;
@@ -92,6 +97,7 @@ void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &p
 
 void Desenho(void)
 {
+
 	cout<<"Fazendo imagem"<<endl;
 
 	using namespace cimg_library;
@@ -102,7 +108,7 @@ void Desenho(void)
 	
 
 	//pintando o fundo
-	CImg<unsigned char> fundo("Vingadores.png");
+	CImg<unsigned char> fundo(nome.data());
 
 	for(int i = 0; i < windowWidth; ++i){
 		for(int j = 0; j < windowHeight; ++j){
@@ -146,7 +152,21 @@ void Desenho(void)
 		Snow_Man[6]=b2;
 		Snow_Man[7]=b3;
 		Snow_Man[8]=b4;
-
+	Sphere Snow_Man2[2];
+		Sphere barriga2=Sphere({-300.0f,-96.0f,600.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca2=Sphere({-300.0f,150.0f,600.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Snow_Man2[0] = barriga2;
+		Snow_Man2[1] = cabeca2;
+	Sphere Snow_Man3[2];
+		Sphere barriga3=Sphere({300.0f,-96.0f,600.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca3=Sphere({300.0f,150.0f,600.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Snow_Man3[0] = barriga3;
+		Snow_Man3[1] = cabeca3;
+	Sphere Snow_Man4[2];
+		Sphere barriga4=Sphere({0.0f,-96.0f,800.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca4=Sphere({0.0f,150.0f,800.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Snow_Man4[0] = barriga4;
+		Snow_Man4[1] = cabeca4;
 	//Sphere chao({0.0f,-90.0f,1260.0f},800.0f,Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
 
 	//luzes	
@@ -161,6 +181,18 @@ void Desenho(void)
 	
 	for(int k=0;k<9;k++){
 		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man[k].centro);
+			
+	}
+	for(int k=0;k<2;k++){
+		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man2[k].centro);
+			
+	}
+	for(int k=0;k<2;k++){
+		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man3[k].centro);
+			
+	}
+	for(int k=0;k<2;k++){
+		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man4[k].centro);
 			
 	}
 
@@ -193,6 +225,27 @@ void Desenho(void)
 			//percorrendo o boneco para tirar as medidas
 			for(int k=0;k<9;k++){
 				if(Snow_Man[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
+					distancias[pos]=t;
+					cores[pos]=aux;
+					pos=pos+1;
+				}
+			}
+			for(int k=0;k<2;k++){
+				if(Snow_Man2[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
+					distancias[pos]=t;
+					cores[pos]=aux;
+					pos=pos+1;
+				}
+			}
+			for(int k=0;k<2;k++){
+				if(Snow_Man3[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
+					distancias[pos]=t;
+					cores[pos]=aux;
+					pos=pos+1;
+				}
+			}
+			for(int k=0;k<2;k++){
+				if(Snow_Man4[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
 					distancias[pos]=t;
 					cores[pos]=aux;
 					pos=pos+1;
@@ -260,22 +313,29 @@ void _Teclado(unsigned char key, int x, int y)
 
 		case 'w':
 			camera={0,0,-250};
+			nome="direita.jpeg";
+
 			break;
 		case 's':
 			camera={0.0f,0.0f,850.0f};
+			nome="costa.jpeg";
 			break;
 
 		case 'a':
 			camera={454,0,0};
+			nome="esquerda.jpeg";
 			break;
 		case 'd':
 			camera={-454,0,0};
+			nome="frente.jpeg";
 			break;
 		case 'q':
 			camera={0,454,0};
+			nome="chao.jpeg";
 			break;
 		case 'e':
 			camera={0,-454,0};
+			nome="teto.jpeg";
 			break;
 	}
 
