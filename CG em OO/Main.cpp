@@ -171,7 +171,7 @@ void Desenho(void)
 
 	//luzes	
 	Light_Source sun=Light_Source({0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f});
-    Light_Source post=Light_Source({0.0f,64.0f,100.0f},{0.9f,0.9f,0.9f});
+    Light_Source post=Light_Source({1000.0f,1000.0f,1000.0f},{0.9f,0.9f,0.9f});
 
 	//onde esta a camera , para onde olha e a orientaçao
 	//Vector3 camera={0.0f,0.0f,-250.0f};
