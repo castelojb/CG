@@ -1,12 +1,12 @@
-#ifndef PLANO_H_
-#define PLANO_H_
+#ifndef TRIANGULO_H_
+#define TRIANGULO_H_
 
 #include "Vector3.h"
 #include "Texture.h"
 #include "Objeto.h"
 
 using namespace std;
-class Plano: public Objeto {
+class Triangulo: public Objeto {
 public:
 	
 
@@ -17,11 +17,12 @@ public:
 	float polimento;
 	
 	
-	Plano(Vector3 position1 ,Vector3 position2,Vector3 position3, Texture textura ,float polimento);
-	Plano();
+	Triangulo(Vector3 position1 ,Vector3 position2,Vector3 position3, Texture textura ,float polimento);
+	Triangulo();
 	
 	bool RayIntersects(Vector3 raydir,Vector3 rayor , float *t);	
-	
+	bool Esta_Contido(Vector3 hitpoint);
+
 	Vector3 getNormal(Vector3 hitpoint);
 	Texture getTexture();
 	float getPolimento();
@@ -30,4 +31,4 @@ public:
 	void Transform_Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp);
 };
 
-#endif /* PLANO_H_ */
+#endif /* TRIANGULO_H_ */

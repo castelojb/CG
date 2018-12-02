@@ -9,15 +9,22 @@
 #include "LightSource.h"
 #include "Texture.h"
 #include <math.h>
-using namespace std;//adicionar as texturas do objeto
-Iluminacao::Iluminacao(Vector3 observer , Vector3 Point_Object , Vector3 Normal_Of_Face , Texture Texture_Object , Light_Source sun , Light_Source post) {
+using namespace std;
+
+
+//adicionar as texturas do objeto
+Iluminacao::Iluminacao(Vector3 observer , Vector3 Point_Object , Vector3 Normal_Of_Face , Texture Texture_Object , Light_Source post) {
 	
 	Vector3 n=Normal_Of_Face.Normalize();
 
 	Vector3 l=Generate_L_Vector(Point_Object,post);
 	Vector3 v=Generate_V_Vector(Point_Object, observer);
 	Vector3 r=Generate_R_Vector(l,n);
-	Ipix= post.color.arroba(Texture_Object.texture_amb) + Idif(post , Texture_Object.texture_dif , l ,n) + Iesp(post , Texture_Object.texture_esp , r ,v,1);
+	Ipix     =post.color.arroba(Texture_Object.texture_amb) + Idif(post , Texture_Object.texture_dif , l ,n) + Iesp(post , Texture_Object.texture_esp , r ,v,1);
+}
+
+Iluminacao::Iluminacao(Texture textura , Light_Source post){
+	Ipix =post.color.arroba(textura.texture_amb);	
 }
 
 Vector3 Iluminacao::Generate_L_Vector(Vector3 Point_Object, Light_Source post){

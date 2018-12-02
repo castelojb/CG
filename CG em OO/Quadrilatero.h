@@ -1,27 +1,26 @@
-#ifndef PLANO_H_
-#define PLANO_H_
+#ifndef QUADRILATERO_H_
+#define QUADRILATERO_H_
 
 #include "Vector3.h"
 #include "Texture.h"
+#include "Triangulo.h"
 #include "Objeto.h"
 
 using namespace std;
-class Plano: public Objeto {
+class Quadrilatero: public Objeto{
 public:
-	
-
 	Texture textura =Texture({0,0,0},{0,0,0},{0,0,0});
-	Vector3 position1;
-	Vector3 position2;
-	Vector3 position3;
+	Triangulo *f1;
+	Triangulo *f2;
 	float polimento;
 	
 	
-	Plano(Vector3 position1 ,Vector3 position2,Vector3 position3, Texture textura ,float polimento);
-	Plano();
+	Quadrilatero(Vector3 position1 ,Vector3 position2,Vector3 position3,Vector3 position4, Texture textura ,float polimento);
+	Quadrilatero();
 	
 	bool RayIntersects(Vector3 raydir,Vector3 rayor , float *t);	
-	
+	bool Esta_Contido(Vector3 hitpoint);
+
 	Vector3 getNormal(Vector3 hitpoint);
 	Texture getTexture();
 	float getPolimento();
@@ -30,4 +29,4 @@ public:
 	void Transform_Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp);
 };
 
-#endif /* PLANO_H_ */
+#endif

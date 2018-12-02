@@ -12,6 +12,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <math.h>
+#include <vector>
 
 //include da imagem
 #include "CImg.h"
@@ -25,6 +27,12 @@
 #include "Vector3.h"
 #include "LightSource.h"
 #include "Sphere.h"
+#include "Iluminacao.h"
+#include "Camera.h"
+#include "Plano.h"
+#include "Triangulo.h"
+#include "Spot.h"
+#include "Quadrilatero.h"
 //#include "ImageClass.h"
 //#include "SOIL.h"
 
@@ -32,68 +40,26 @@
 
 using namespace std;
 
-string nome="direita.jpeg";;
+//foto de inicializacao
+string nome="sandcastle_rt.tga";
 
 
 //dimensoes da tela, adaptar com a quantidade de pixels da imagem usada
-GLdouble windowWidth  = 500.0;
-GLdouble windowHeight = 500.0;
+GLdouble windowWidth  = 512.0;
+GLdouble windowHeight = 512.0;
 
 int window;
-Vector3 camera={0,0,-250};;
+Vector3 camera={0,0,-500};
+Vector3 LoockAt={0.0f,-96.0f,300.0f};
+Vector3 ViewUp= {0.0f,150.0f,300.0f};
+
 //CImg fundo;
 
 GLuint* vao;
 GLuint* vbo;
 GLuint* ibo;
 
-void Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp , Vector3 &ponto){
-	Vector3 Kc;
-	Vector3 Ic;
-	Vector3 Jc;
-	Vector3 aux;
 
-	Kc=(LoockAt-camera).Normalize();
-	
-	aux=ViewUp-LoockAt;
-
-	Ic=(Kc.Cross(aux)).Normalize();
-
-	Jc= (Ic.Cross(Kc)).Normalize();
-	
-	float MundoParaCamera[4][4];
-
-	MundoParaCamera[0][0] = Ic[0];
-	MundoParaCamera[0][1] = Ic[1];
-	MundoParaCamera[0][2] = Ic[2];
-	MundoParaCamera[0][3] = -Ic.Dot(camera);
-
-	MundoParaCamera[1][0] = Jc[0];
-	MundoParaCamera[1][1] = Jc[1];
-	MundoParaCamera[1][2] = Jc[2];
-	MundoParaCamera[1][3] = -Jc.Dot(camera);
-
-	MundoParaCamera[2][0] = Kc[0];
-	MundoParaCamera[2][1] = Kc[1];
-	MundoParaCamera[2][2] = Kc[2];
-	MundoParaCamera[2][3] = -Kc.Dot(camera);
-
-	MundoParaCamera[3][0] = 0;
-	MundoParaCamera[3][1] = 0;
-	MundoParaCamera[3][2] = 0;
-	MundoParaCamera[3][3] = 1;
-
-	aux[0] = MundoParaCamera[0][0] * ponto[0] + MundoParaCamera[0][1] * ponto[1] + MundoParaCamera[0][2] * ponto[2] + MundoParaCamera[0][3];
-
-	aux[1] = MundoParaCamera[1][0] * ponto[0] + MundoParaCamera[1][1] * ponto[1] + MundoParaCamera[1][2] * ponto[2] + MundoParaCamera[1][3];
-
-	aux[2] = MundoParaCamera[2][0] * ponto[0] + MundoParaCamera[2][1] * ponto[1] + MundoParaCamera[2][2] * ponto[2] + MundoParaCamera[2][3];
-	
-	for (int i = 0; i < 3; i++){
- 		ponto[i] = aux[i];
-	}	
-
-}
 
 void Desenho(void)
 {
@@ -106,7 +72,7 @@ void Desenho(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_POINTS);
 	
-
+	
 	//pintando o fundo
 	CImg<unsigned char> fundo(nome.data());
 
@@ -124,82 +90,154 @@ void Desenho(void)
 			glVertex2f(x, y);
 		}
 	}
+	
 
 	//definindo o boneco
-	Sphere Snow_Man[9];
+		//definindo o boneco
+	Sphere Hulk [25];
 
-		Sphere barriga=Sphere({0.0f,-96.0f,300.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere peitodir= Sphere({-90.0f,10.0f+444,300.0f}, 120.0f ,10, Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere peitoesq= Sphere({90.0f,10.0f+444,300.0f}, 120.0f ,10, Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f})); 
 	
-		Sphere cabeca=Sphere({0.0f,150.0f,300.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca=Sphere({0.0f,180.0f+444,300.0f}, 100.0f,10 ,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+
+		Sphere ab1 = Sphere({-40.0f,-110.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere ab2 = Sphere({40.0f,-110.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere ab3 = Sphere({-40.0f,-200.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere ab4 = Sphere({40.0f,-200.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere ab5 = Sphere({-40.0f,-290.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere ab6 = Sphere({40.0f,-290.0f+444,300.0f}, 60.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+
+		Sphere pants = Sphere({0.0f,-400.0f+444,300.0f}, 100.0f ,10,Texture({0.33f,0.10f,0.55f} , {0.3f,0.1f,0.5f} , {0.3f,0.1f,0.5f}));
+
+		Sphere legdir1 = Sphere({-90.0f,-490.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere legdir2 = Sphere({-140.0f,-600.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere legdir3 = Sphere({-190.0f,-700.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere legesq1 = Sphere({90.0f,-490.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere legesq2 = Sphere({140.0f,-600.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere legesq3 = Sphere({190.0f,-700.0f+444,300.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+
+		Sphere armdir1 = Sphere({-210.0f,10.0f+444,300.0f}, 90.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere armdir2 = Sphere({-300.0f,-70.0f+444,250.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere armdir3 = Sphere({-230.0f,-150.0f+444,200.0f}, 70.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere armesq1 = Sphere({210.0f,10.0f+444,300.0f}, 90.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere armesq2 = Sphere({300.0f,-70.0f+444,250.0f}, 80.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+		Sphere armesq3 = Sphere({230.0f,-150.0f+444,200.0f}, 70.0f ,10,Texture({0.0f,0.38f,0.11f} , {0.0f,0.3f,0.1f} , {0.3f,0.3f,0.1f}));
+
+
+
+
+
+
+		Sphere olho_direito=Sphere({-20.0f,180.0f+444,200.0f}, 8.0f ,10, Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
 	
-		Sphere olho_direito=Sphere({-20.0f,150.0f,200.0f}, 8.0f , Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
+		Sphere olho_esquerdo=Sphere({20.0f,180.0f+444,200.0f}, 8.0f ,10, Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
 	
-		Sphere olho_esquerdo=Sphere({20.0f,150.0f,200.0f}, 8.0f , Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
+		Sphere nariz=Sphere({0.0f,120.0f+444,200.0f}, 8.0f , 10,Texture({0.9f,0.2f,0.2f} , {0.9f,0.2f,0.2f} , {0.9f,0.2f,0.2f}));
 	
-		Sphere nariz=Sphere({0.0f,120.0f,200.0f}, 8.0f , Texture({0.9f,0.2f,0.2f} , {0.9f,0.2f,0.2f} , {0.9f,0.2f,0.2f}));
+
+		Hulk[0]=cabeca;
+		Hulk[1]=peitodir;
+		Hulk[2]=olho_direito;
+		Hulk[3]=olho_esquerdo;
+		Hulk[4]=nariz;
+		Hulk[5]=peitoesq;
+		Hulk[6]=ab1;
+		Hulk[7]=ab2;
+		Hulk[8]=ab3;
+		Hulk[9]=ab4;
+		Hulk[10]=ab5;
+		Hulk[11]=ab6;
+		Hulk[12]=legdir1;
+		Hulk[13]=legdir2;
+		Hulk[14]=legdir3;
+		Hulk[15]=legesq1;
+		Hulk[16]=legesq2;
+		Hulk[17]=legesq3;
+		Hulk[18]=armdir1;
+		Hulk[19]=armdir2;
+		Hulk[20]=armdir3;
+		Hulk[21]=armesq1;
+		Hulk[22]=armesq2;
+		Hulk[23]=armesq3;
+		Hulk[24]=pants;
 	
-		Sphere b1=Sphere({0.0f,0.0f,170.0f}, 8.0f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
-		Sphere b2=Sphere({0.0f,-30.0f,150.0f}, 8.0f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
-		Sphere b3=Sphere({0.0f,-60.0f,140.0f}, 6.5f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
-		Sphere b4=Sphere({0.0f,-90.0f,137.0f}, 6.0f , Texture({0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f} , {0.2f,0.9f,0.2f}));
-		
-		Snow_Man[0]=cabeca;
-		Snow_Man[1]=barriga;
-		Snow_Man[2]=olho_direito;
-		Snow_Man[3]=olho_esquerdo;
-		Snow_Man[4]=nariz;
-		Snow_Man[5]=b1;
-		Snow_Man[6]=b2;
-		Snow_Man[7]=b3;
-		Snow_Man[8]=b4;
 	Sphere Snow_Man2[2];
-		Sphere barriga2=Sphere({-300.0f,-96.0f,600.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
-		Sphere cabeca2=Sphere({-300.0f,150.0f,600.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere barriga2=Sphere({-300.0f,-96.0f,600.0f}, 160.0f,10 , Texture({0.48f,0.47f,0.13f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca2=Sphere({-300.0f,150.0f,600.0f}, 100.0f ,10, Texture({0.48f,0.47f,0.13f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
 		Snow_Man2[0] = barriga2;
 		Snow_Man2[1] = cabeca2;
+	
 	Sphere Snow_Man3[2];
-		Sphere barriga3=Sphere({300.0f,-96.0f,600.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
-		Sphere cabeca3=Sphere({300.0f,150.0f,600.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere barriga3=Sphere({300.0f,-96.0f,600.0f}, 160.0f,150 , Texture({0.98f,0.11f,0.18f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
+		Sphere cabeca3=Sphere({300.0f,150.0f,600.0f}, 100.0f,150 , Texture({0.98f,0.11f,0.18f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
 		Snow_Man3[0] = barriga3;
 		Snow_Man3[1] = cabeca3;
-	Sphere Snow_Man4[2];
-		Sphere barriga4=Sphere({0.0f,-96.0f,800.0f}, 160.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
-		Sphere cabeca4=Sphere({0.0f,150.0f,800.0f}, 100.0f , Texture({0.5f,0.5f,0.5f} , {0.3f,0.3f,0.3f} , {0.3f,0.3f,0.3f}));
-		Snow_Man4[0] = barriga4;
-		Snow_Man4[1] = cabeca4;
-	//Sphere chao({0.0f,-90.0f,1260.0f},800.0f,Texture({0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f} , {0.2f,0.2f,0.2f}));
+	
+	//Definindo o plano infinito
+	Plano chao =Plano({0.0f,-256.0f,300.0f},{0,-256,400},{100,-256,300},Texture({0.50,0.16,0.16} , {0.3,0.3,0.3} , {0.3,0.3,0.3}),100);
+	
+	//Defindo o triangulo
+	Triangulo lente_direita=Triangulo({-20,150,192},{-20,100,192},{30,125,192},Texture({0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f}),7);
+	Triangulo lente_esquerda=Triangulo({-20,150,192},{-20,100,192},{-70,125,192},Texture({0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f}),7);
+	
+	Quadrilatero tv = Quadrilatero({-40,200,200},{-40,400,200},{360,400,300},{360,200,300} ,Texture({0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f} , {0.9f,0.9f,0.2f}),7);
+	
+	//vetor que guarda elementos do cenario
+	vector<Objeto*> cenario;
+	
+	//Colocando os bonecos no cenario
+	for(int k=0;k<25;k++){
+		cenario.push_back(&Hulk[k]);
+	}
 
-	//luzes	
-	Light_Source sun=Light_Source({0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f});
-    Light_Source post=Light_Source({1000.0f,1000.0f,1000.0f},{0.9f,0.9f,0.9f});
+	cenario.push_back(&Snow_Man2[0]);
+	cenario.push_back(&Snow_Man2[1]);
+	cenario.push_back(&Snow_Man3[0]);
+	cenario.push_back(&Snow_Man3[1]);
+	cenario.push_back(&chao);
+	cenario.push_back(&tv);
+	//cenario.push_back(&lente_direita);
+	//cenario.push_back(&lente_esquerda);
+	
+
+	//luz ambiente	
+    Light_Source sun=Light_Source({300000000000.0f,300000000000.0f,00000.0f},{0.9f,0.9f,0.9f});
+    
+    //luzes secundarias
+    Light_Source post=Light_Source({0000.0f,300000000000.0f,300000000000.0f},{0.9f,0.9f,0.9f});
+    Spot upper=Spot({0.0f,3000000.0f,300.0f},{0.9f,0.9f,0.9f});
+	
+	//vetor que guarda as fontes luminosas
+	vector<Fonte_Luminosa*> luzes;
+
+	luzes.push_back(&sun);
+	//luzes.push_back(&post);
+	luzes.push_back(&upper);
+
+
 
 	//onde esta a camera , para onde olha e a orientaçao
-	//Vector3 camera={0.0f,0.0f,-250.0f};
-	Vector3 LoockAt={0.0f,-96.0f,300.0f};
-	Vector3 ViewUp= {0.0f,150.0f,300.0f};
-	//cout<<(camera- Snow_Man[0].centro).Magnitude()<<endl;
+	//Vector3 LoockAt={0.0f,-96.0f,300.0f};
+	//Vector3 ViewUp= {0.0f,150.0f,300.0f};
 	
-	for(int k=0;k<9;k++){
-		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man[k].centro);
-			
-	}
-	for(int k=0;k<2;k++){
-		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man2[k].centro);
-			
-	}
-	for(int k=0;k<2;k++){
-		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man3[k].centro);
-			
-	}
-	for(int k=0;k<2;k++){
-		Mundo_Camera(camera,LoockAt,ViewUp,Snow_Man4[k].centro);
-			
+	
+	//levando o cenario para o mundo da camera
+	for(int k=0; k<cenario.size();k++){
+		cenario[k]->Transform_Mundo_Camera(camera , LoockAt , ViewUp);
 	}
 
-	//Mundo_Camera(camera,LoockAt,ViewUp,chao.centro);
-	Mundo_Camera(camera,LoockAt,ViewUp,post.position);
+	//levando as luzes para o mundo da camera
+	for(int k=0; k<luzes.size(); k++){
+		luzes[k]->Transform_Mundo_Camera(camera , LoockAt , ViewUp);	
+	}
+	
 
-	Vector3 observer={0,0,0};
+
+	//levando a camera para o seu mundo
+	Mundo_Camera(camera,LoockAt,ViewUp,camera);
+	
+
 	for(int i = 0; i < windowWidth; ++i)
 	{
 		for(int j = 0; j < windowHeight; ++j)
@@ -208,70 +246,112 @@ void Desenho(void)
 			double x = (i  - windowWidth/2);
 			double y = (j - windowHeight/2);
 			
-			//inicializando vetor que armazena cor e a var que armazena a distancia
-			//pos que limita o tamanho efetivo do vetor
-			Vector3 aux=Vector3(1.0f,1.0f,1.0f);
-			float t=-1.0f;
-			int pos=0;
+			//Vetor para armazenar objetos atingidos pelo raio
+			vector<Objeto*> objetos_interceptados;
 
-			//vetor que liga o observador a tela (x,y,d)		
+			//Vetor para armazenar as distancias registradas para um raio
+			vector<float> distancias;
+			
+			//variavel que guarda a distancia do raio
+			float t;
+			
+			//vetor de posicionamento da tela (x,y,d)		
 			Vector3 point={x,y,150};
 
-			//vetores que serao percorridos para achar seus menores valores
-			float distancias[100];
-			Vector3 cores[100];
+			//percorrendo o cenario para saber se o raio intercepta um ponto
+			for(int k=0;k<cenario.size();k++){
+				if(cenario[k]->RayIntersects( (point - camera),camera ,&t)){
+					distancias.push_back(t);
+					objetos_interceptados.push_back(cenario[k]);
+				}
+				
+			}
 
-			
-			//percorrendo o boneco para tirar as medidas
-			for(int k=0;k<9;k++){
-				if(Snow_Man[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
-					distancias[pos]=t;
-					cores[pos]=aux;
-					pos=pos+1;
-				}
-			}
-			for(int k=0;k<2;k++){
-				if(Snow_Man2[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
-					distancias[pos]=t;
-					cores[pos]=aux;
-					pos=pos+1;
-				}
-			}
-			for(int k=0;k<2;k++){
-				if(Snow_Man3[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
-					distancias[pos]=t;
-					cores[pos]=aux;
-					pos=pos+1;
-				}
-			}
-			for(int k=0;k<2;k++){
-				if(Snow_Man4[k].RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
-					distancias[pos]=t;
-					cores[pos]=aux;
-					pos=pos+1;
-				}
-			}
-			/*
-			if(chao.RayIntersects(point - observer , {0.0f,0.0f,-1.0f} , aux , observer , sun , post , &t)){
-				distancias[pos]=t;
-					cores[pos]=aux;
-					pos=pos+1;
-			}
-			*/
-			
-			
-			//laco para descobrir o menor t
-			if(pos != 0){
+			//se o tamanho do meu vetor eh diferente de 0, alguem foi interceptado
+			if(distancias.size() != 0){
+
+				//laco para descobrir a menor distancia para saber o que deve ser exibido
 				int menor=0;
-				for(int k=0 ; k<pos ; k++){
+				for(int k=0 ; k< distancias.size() ; k++){
 					if(distancias[menor]>distancias[k]){
 						menor=k;
 					}
 				}
 
-				glColor3d(cores[menor][0],cores[menor][1],cores[menor][2]);
-    			glVertex2d(x,y);
+				//calculo de onde esta localizado o ponto que sera exibido (ponto_da_origem_do_raio + direcao_do_raio * distancia)
+				Vector3 hitpoint = camera + (point - camera)*distancias[menor];
+
+				
+				//vetor que guarda as posicioes do meu vector luzes que estao obstruidos pelos objetos
+				vector<int> tem_sombra;
+
+
+				//laco que vai verificar se o raio que sai do hitpoint ate a fonte de luz eh obstruido por algum objeto
+				for(int k=0;k<cenario.size();k++){
+
+					for(int l=0; l<luzes.size(); l++){
+
+						//condicional: "esse raio que liga o hitpoint ate a minha luzes[l] esta obstruido?"
+						if(cenario[k]->RayIntersects((luzes[l]->getPosition() - hitpoint).Normalize(),hitpoint , &t)){
+							
+							//guardar o seu indice l no tem_sombra
+							tem_sombra.push_back(l);
+
+						}
+					}
+				}
+
+				//vetor booleano que vai guiar o meu calculo
+				vector<bool> sombra;
+				for(int k=0 ; k<luzes.size() ; k++){
+					sombra.push_back(false);
+				}
+
+				//adicionando true nas posicisoes guardadas no tem_sombra 
+				for(int k=0 ; k<tem_sombra.size() ; k++){
+					sombra[tem_sombra[k]]=true;
+				}
+
+				//inicializacao da cor
+				Vector3 rgb={0,0,0};
+				
+				//pegando a normal que sera utilizada
+				Vector3 normal=objetos_interceptados[menor]->getNormal(hitpoint);
+
+				//somatorio para a cor
+				for(int k=0 ; k<luzes.size() ; k++){
+					if(sombra[k]==false){
+					
+	    				rgb= rgb+ luzes[k]->Iluminacao(camera , hitpoint , normal , objetos_interceptados[menor]->getTexture(),objetos_interceptados[menor]->getPolimento());	
+					
+					}
+				}
+				
+				//adicionando a componente ambiente que foi armazenada na posicao luzes[0]
+				rgb=rgb + luzes[0]->Iluminacao(objetos_interceptados[menor]->getTexture());
+				
+				//fator de correcao (em fase de teste) para diminuir a luminosidade excessiva
+				//float maior=rgb[0];
+	    				/*
+	    				for(int k=0;k<3;k++){
+	    					if(maior<rgb[k]){
+	    						maior=rgb[k];
+	    					}
+	    				}
+
+	    				if(maior>=1){
+							for(int k=0;k<3;k++){
+	    						rgb[k]=rgb[k]/maior;
+	    					}	    					
+	    				}
+						*/	    				
+				
+				glColor3d(rgb[0],rgb[1],rgb[2]);
+				
+				glVertex2d(x,y);
 			}
+
+
 
 		}
 	}
@@ -280,6 +360,8 @@ void Desenho(void)
 	glEnd();
 	glFlush();
 	
+
+
 }
 
 
@@ -313,29 +395,29 @@ void _Teclado(unsigned char key, int x, int y)
 
 		case 'w':
 			camera={0,0,-250};
-			nome="direita.jpeg";
+			nome="sandcastle_rt.tga";
 
 			break;
 		case 's':
-			camera={0.0f,0.0f,850.0f};
-			nome="costa.jpeg";
+			camera={0.0f,0.0f,1050.0f};
+			nome="sandcastle_bk.tga";
 			break;
 
 		case 'a':
-			camera={454,0,0};
-			nome="esquerda.jpeg";
+			camera={554,0,0};
+			nome="sandcastle_lf.tga";
 			break;
 		case 'd':
-			camera={-454,0,0};
-			nome="frente.jpeg";
+			camera={-1054,0,0};
+			nome="sandcastle_ft.tga";
 			break;
 		case 'q':
-			camera={0,454,0};
-			nome="chao.jpeg";
+			camera={0,554,0};
+			nome="sandcastle_dn.tga";
 			break;
 		case 'e':
-			camera={0,-454,0};
-			nome="teto.jpeg";
+			camera={0,-554,0};
+			nome="sandcastle_up.tga";
 			break;
 	}
 
@@ -343,9 +425,45 @@ void _Teclado(unsigned char key, int x, int y)
 }
 
 // Callback do GLUT: Eventos de mouse com algum botão pressionado
-void _Mouse(int x, int y)
+void MouseClick (int button, int state, int x, int y)
 {
+    switch (button)
+    {
+        case GLUT_LEFT_BUTTON: printf("Botao esquerdo.");
+                               break;
+        case GLUT_RIGHT_BUTTON: printf("Botao direito.");
+                               break;
+        case GLUT_MIDDLE_BUTTON: printf("Botao do meio.");
+                               break;
+    }
+    if (state == GLUT_DOWN)
+        printf("Pressionado na posição: ");
+    if (state == GLUT_UP)
+        printf("Liberado na posição: ");
+    printf("(%d, %d)\n", x,y);
+}
+// **************************************************
+// Função chamada quando o mouse anda sobre a janele
+// e NÃO HÁ botão pressionado
+// **************************************************
+void MouseAndandoNaoPressionado (int x, int y)
+{
+    printf("Mouse ANDANDO solto na janela. Posição: (%d, %d)\n", x,y);
 
+    double xo = (x  - windowWidth/2);
+	double yo = (y - windowHeight/2);
+
+    LoockAt={xo,yo,300};
+    ViewUp= {xo,yo+10,300};
+    glutPostRedisplay();
+}
+// **************************************************
+// Função chamada quando o mouse anda sobre a janele
+// e HÁ botão pressionado
+// **************************************************
+void MouseAndandoPressionado (int x, int y)
+{
+    printf("Mouse ANDANDO pressionado na janela. Posição: (%d, %d)\n", x,y);
 }
 
 int main(int argc, char *argv[])
@@ -356,17 +474,31 @@ int main(int argc, char *argv[])
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize((int) windowWidth, (int) windowHeight);
 	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)- windowWidth)/2, (glutGet(GLUT_SCREEN_HEIGHT)- windowHeight)/2);
-	window = glutCreateWindow("A Guerra Acabou");
+	window = glutCreateWindow("Snow Man e o Plano infinito com Muitas Luzes");
 
 	glewExperimental = GL_TRUE;
 
-	// Definição de callbacks
+	//Definição de callbacks
 	glutReshapeFunc(_Redimensionar);
 	glutKeyboardFunc(_Teclado);
-	glutMotionFunc(_Mouse);
+	//glutMotionFunc(_Mouse);
 	glutDisplayFunc(Desenho);
 
+	// Define as funções de MOUSE
+ 
+    // movimento SEM botão pressionado
+    glutPassiveMotionFunc(MouseAndandoNaoPressionado);
 
+    // movimento COM botão pressionado
+    glutMotionFunc(MouseAndandoPressionado);
+
+
+
+    // Click em um botão
+    glutMouseFunc(MouseClick);
 	glutMainLoop();
 	exit(0);
+
+	
+	return 0;
 }

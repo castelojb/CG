@@ -11,15 +11,25 @@
 #include "GameObject.h"
 #include "Texture.h"
 #include "LightSource.h"
-class Sphere: public GameObject {
+#include "Objeto.h"
+class Sphere: public Objeto {
 public:
-	Sphere(Vector3 centro , double raio , Texture textura);
-	Sphere();
 	Vector3 centro={0,0,0};
-	double raio;
 	Texture textura=Texture({0,0,0},{0,0,0},{0,0,0});
-	bool RayIntersects(Vector3 raydir,  Vector3 rayorig, Vector3 &aux , Vector3 observer , Light_Source sun , Light_Source post ,float *distance);
+	double raio;
+	float polimento;
 	
+	Sphere(Vector3 centro , double raio,float polimento , Texture textura);
+	Sphere();
+	
+	bool RayIntersects(Vector3 raydir,Vector3 rayor , float *t);
+
+	Vector3 getNormal(Vector3 hitpoint);
+	Texture getTexture();
+	float getPolimento();
+
+	void Transform_Camera_Mundo(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp);
+	void Transform_Mundo_Camera(Vector3 camera , Vector3 LoockAt , Vector3 ViewUp);
 };
 
 #endif /* SPHERE_H_ */

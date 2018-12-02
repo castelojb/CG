@@ -1,19 +1,11 @@
-/*
- * LightSource.h
- *
- *  Created on: 26 de set de 2018
- *      Author: joao
- */
-
-#ifndef LIGHTSOURCE_H_
-#define LIGHTSOURCE_H_
+#ifndef SPOT_H_
+#define SPOT_H_
 #include "Vector3.h"
 #include "Fonte_Luminosa.h"
 
-class Light_Source: public Fonte_Luminosa {
-public://informacoes das fontes luminosas
-
-	Light_Source(Vector3 position,Vector3 color);
+class Spot: public Fonte_Luminosa {
+public:
+	Spot(Vector3 position,Vector3 color);
 
 	Vector3 position={0,0,0};
 	Vector3 getPosition();
@@ -34,7 +26,7 @@ public://informacoes das fontes luminosas
 	Vector3 Idif(Vector3 Texture_Object , Vector3 l , Vector3 n);
 	Vector3 Iesp(Vector3 Texture_Object , Vector3 r , Vector3 v, int m);
 
-
+	double spotlight(Vector3 point ,Vector3 l,Vector3 s, double e);
 };
 
-#endif /* LIGHTSOURCE_H_ */
+#endif
